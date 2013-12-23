@@ -112,6 +112,15 @@ local object_proxy = function(obj, parent)
       return self
     end,
 
+    __tostring = function(self)
+      local obj = getmetatable(self).obj
+      if obj['__tostring'] then
+        return obj:__tostring()
+      end
+      return tostring(obj)
+    end,
+
+
     obj = obj,
     parent = parent,
   }

@@ -134,13 +134,16 @@ describe("object basic concepts", function()
 
     local named = object({ -- create obj w/o inheritance
       name = 'name',
+      setName = function(self,val)
+        self.name = "test "..val
+      end
     })
 
     local n1 = named()
     assert.is.equal(n1:getName(), 'name')
 
     local n2 = named({ name = 'n2'})
-    assert.is.equal(n2:getName(), 'n2')
+    assert.is.equal(n2:getName(), 'test n2')
 
     local namedInit = object({
       name = 'none',

@@ -1,5 +1,7 @@
 require 'signal'
 
+local print = function() end
+
 local camelize = function(str)
     return str:gsub("^%l", string.upper)
 end
@@ -26,11 +28,11 @@ local object_reflection = function(obj)
   return {
     obj = obj,
     hasProperty = function(self, property)
-      return self.obj[property] and type(self.obj[property]) ~= 'function'
+      return self.obj[property] ~= nil and type(self.obj[property]) ~= 'function'
     end,
 
     hasMethod = function(self, method)
-      return self.obj[method] and type(self.obj[method]) == 'function'
+      return self.obj[method] ~= nil and type(self.obj[method]) == 'function'
     end,
 
     hasGetter = function(self, property) 
@@ -38,7 +40,7 @@ local object_reflection = function(obj)
     end,
 
     hasConstructor = function(self)
-      return self.obj['init']
+      return self.obj['init'] ~= nil and type(self.obj['init']) == 'function'
     end,
   }
 end
@@ -51,34 +53,34 @@ local object_proxy = function(obj, parent)
       local obj = proxy.obj
       local rx = object_reflection(obj)
 
-      --print("I", table, index, obj, type(obj[index]))
+      print("I", table, index, obj, type(obj[index]))
       if util.isSetter(index) and rx:hasMethod(index) and rx:hasProperty(util.toProperty(index)) then
-        --print("S + P", index)
+        print("S + P", index)
         return function(proxy,val) obj[index](obj,val) end
       elseif rx:hasMethod(index) or rx:hasProperty(index) then
-        --print("D", index)
+        print("D", index)
         return obj[index]
       elseif not rx:hasProperty(index) and rx:hasGetter(index) then
         local getter = util.toGetter(index)
-        --print("P -> G", index, getter)
+        print("P -> G", index, getter)
         return obj[getter](obj)
       elseif not rx:hasMethod(index) and rx:hasProperty(util.toProperty(index)) then
         local property = util.toProperty(index)
         if util.isSetter(index) then
-          --print("S -> P", index, property)
+          print("S -> P", index, property)
           return function(proxy,val) obj[property] = val end
         else 
-          --print("G -> P", index, property)
+          print("G -> P", index, property)
           return function() return obj[property] end
         end
       elseif index == 'extensionMethod' then
-          --print("EXM", index, property)
+          print("EXM", index, property)
           return function(name, fn) obj[name] = fn end
       elseif proxy.parent then -- try invoke parent 
-        --print("P", index, property)
+        print("P", index, property)
         return proxy.parent[index]
       elseif index == 'init' then -- asking for nonexisting c-tor
-        --print("C", index, property)
+        print("C", index, property)
         return nil
       end
       error("request nonexisting attribute: "..index)

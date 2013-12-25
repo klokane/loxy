@@ -194,6 +194,22 @@ local object_proxy = function(impl, parent)
   }
 end
 
+--[[
+  Class implementation:
+
+  <instance>: - empty table, behavior is based on <proxy>
+    +-mt.__(new)index -> <proxy>
+    |                  +- <impl> (raw class as wriiten by user)
+    |                       +-mt.__index - <parent impl> (w/o proxy)
+    |
+    +-mt.__call -> <c-tor> 
+                      - implicit via table (copy key/value into instance)
+                      - explicit via __init method
+                      - on create object instance is __call se to nil 
+                        to avoid invoke c-tor on object instance
+
+--]]
+
 object = function(parent, impl)
   if not impl then
    impl = parent

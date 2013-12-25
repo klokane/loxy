@@ -2,96 +2,33 @@ require 'busted'
 require 'object'
 
 --tostring = require 'ml'.tstring
-describe("object basic concepts", function()
-  it('should handle inheritance concept', function()
-
-    local shape = object({ -- create obj w/o inheritance
-      name = 'shape',
-      draw = function(self) return 'draw '..self.name end
-    })
-
-    local s = shape() -- create shape instance
-    assert.is.equal(s:draw(), 'draw shape')
-
-    local circle = object(shape,{ -- inherit from shape
-      name = 'circle',
-      radius = 0,
-      getArea = function(self)
-        return self.radius * 3.14
-      end
-    })
-
-    local c = circle{ radius = 10 } -- create instance of cicle
-    assert.is.equal(c:draw(), 'draw circle') -- try to invoke parent
-    assert.is.equal(c.area, 10*3.14)
-
-    local filledCircle = object(circle,{ -- inherit from cicrle, but override draw
-      fill = 'none',
-      draw = function(self) return string.format("draw %s %s", self.fill, self.name) end,
-    })
-    local fc = filledCircle{fill = 'red'}
-    assert.is.equal(fc:draw(), 'draw red circle') -- invoke overrided draw()
-
-  end)
-
-  it('should handle constructor concept', function()
-
-    local named = object({ -- create obj w/o inheritance
-      name = 'name',
-      setName = function(self,val)
-        self.name = "test "..val
-      end
-    })
-
-    local n1 = named()
-    assert.is.equal(n1:getName(), 'name')
-
-    local n2 = named({ name = 'n2'})
-    assert.is.equal(n2:getName(), 'test n2')
-
-    local namedInit = object({
-      name = 'none',
-      init = function(self, name)
-        self.name = name
-      end,
-    })
-
-    local ni1 = namedInit('ctor')
-    assert.is.equal(ni1.name, 'ctor')
-
-    local ni2 = namedInit({ name = 'xx'}) -- do not invoke init via table
-    assert.is.same(ni2.name, { name = 'xx'} )
-
-  end)
-end)
 
 describe("testing object syntax sugar behaviors", function()
 
-  local circle
+  local CIRCLE, circle
   before_each(function()
-    circle = object({
+    CIRCLE = object({
       radius = 0,
       getArea = function(self)
         return self.radius * 3.14
       end
-    })({ radius = 10 })
+    })
+    circle = CIRCLE({ radius = 10 })
   end)
 
   describe("Testing props/getter/setter", function()
-
-
     it('should call method of object', function()
       assert.is.equal(circle:getArea(), 3.14 * 10)
-    end)
- 
-    it('should handle magic property via getter', function()
-      assert.is.equal(circle.area, 3.14 * 10)
     end)
 
     it('should return property', function()
       assert.is.equal(circle.radius, 10)
     end)
 
+    it('should handle magic property via getter', function()
+      assert.is.equal(circle.area, 3.14 * 10)
+    end)
+ 
     it('should handle magic getter for existing property', function()
       assert.is.equal(circle:getRadius(), 10)
     end)
@@ -120,16 +57,16 @@ describe("testing object syntax sugar behaviors", function()
   end)
 
 
-  describe("Testing setter functionality", function()
+  describe("Testing setter && property functionality", function()
     local o
     before_each(function()
       o = object({
-        x = 2,
+        x = 0,
         setX = function(self, x) self.x = x + 1 end,
-      })()
+      })({ x = 1 })
     end)
 
-    it('do not invoke setter while init', function()
+    it('setter is invoked while init', function()
       assert.is.equal(o.x,2)
     end)
 
@@ -145,7 +82,27 @@ describe("testing object syntax sugar behaviors", function()
 
   end)
 
-  describe("Testing event functionality", function()
+  describe("Testing getter && property functionality", function()
+    local o
+    before_each(function()
+      o = object({
+        x = 0,
+        getX = function(self) return self.x + 1 end,
+      })({ x = 1 })
+    end)
+
+    it('direct call getter', function()
+      assert.has.errors(function() o:getX() end)
+    end)
+
+    it('get througth property', function()
+      assert.has.errors(function() return o.x end)
+    end)
+  end)
+
+  --[[
+
+  describe("Testing events functionality", function()
     local o
     before_each(function()
       o = object({
@@ -189,9 +146,10 @@ describe("testing object syntax sugar behaviors", function()
       assert.is.equal(o.x, 4)
       assert.is.equal(v.x, 4)
     end)
-
   end)
+  --]]
 
+  --[[
   describe("Testing extension method", function()
     local circle
     before_each(function()
@@ -216,5 +174,6 @@ describe("testing object syntax sugar behaviors", function()
     end)
 
   end)
+  --]]
   
 end)

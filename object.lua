@@ -75,10 +75,13 @@ end
 
 
 local object_proxy = function(impl, parent)
-  local parent_mt = getmetatable(parent)
+  -- error if impl has mt to avoid strange behavior
   if getmetatable(impl) then error("implementation has already parent: "..impl) end
+  -- impl inheritance througth mt._index
+  local parent_mt = getmetatable(parent)
   if parent_mt then setmetatable(impl, { __index = parent_mt.impl }) end
-  return {
+
+  local proxy = {
     __index = function(table, index) 
       local proxy, impl, rx = object_manipulators(table) 
       print("R:", table, proxy, impl, index, type(impl[index]))
@@ -192,6 +195,9 @@ local object_proxy = function(impl, parent)
 
     impl = impl,
   }
+
+
+  return proxy
 end
 
 --[[

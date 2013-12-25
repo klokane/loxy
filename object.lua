@@ -3,6 +3,11 @@ require 'signal'
 local print = function() end
 
 local ctor = '__init'
+local overridable_metamethods = { 
+  '__tostring', '__concat',
+  '__add', '__mul', '__sub', '__div', '__unm', '__pow',
+  '__eq', '__lt', '__le',
+}
 
 local camelize = function(str)
     return str:gsub("^%l", string.upper)
@@ -59,6 +64,7 @@ end
  * :is_a()
  * access parent methods
  * check extension method
+ * allow memoize getters
 --]]
 
 local object_manipulators = function(instance)
@@ -175,23 +181,22 @@ local object_proxy = function(impl, parent)
         end
       end
 
+      local i_mt = getmetatable(instance)
+      local impl = getmetatable(instance).impl
+
       -- disable c-tor
-      getmetatable(instance).__call = nil --function() error('call constructor on instance') end
+      i_mt.__call = nil --function() error('call constructor on instance') end
+      -- override metamethods
+      for _,method in pairs(overridable_metamethods) do
+        if c_mt.impl[method] then
+          i_mt[method] = c_mt.impl[method]
+        end
+      end
 
       print("I:",class, instance, ">", arg)
 
       return instance
     end,
-
---[[    
-    __tostring = function(self)
-      local impl = getmetatable(self).impl
-      if impl['__tostring'] then
-        return impl:__tostring()
-      end
-      return tostring(impl)
-    end,
---]]
 
     impl = impl,
   }

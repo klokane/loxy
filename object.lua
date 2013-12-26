@@ -121,41 +121,6 @@ local object_proxy = function(impl, parent)
         return function(instance,class) return is_a(instance, class) end
       end
       error("read unknown attribute: "..index)
-
---[[
-
-      print("I", table, index, impl, type(impl[index]))
-      if util.isSetter(index) and rx:hasMethod(index) and rx:hasProperty(util.toProperty(index)) then
-        print("S + P", index)
-        return function(proxy,val) impl[index](impl,val) end
-      elseif rx:hasMethod(index) or rx:hasProperty(index) then
-        print("D", index)
-        return impl[index]
-      elseif not rx:hasProperty(index) and rx:hasGetter(index) then
-        local getter = util.toGetter(index)
-        print("P -> G", index, getter)
-        return impl[getter](impl)
-      elseif not rx:hasMethod(index) and rx:hasProperty(util.toProperty(index)) then
-        local property = util.toProperty(index)
-        if util.isSetter(index) then
-          print("S -> P", index, property)
-          return function(proxy,val) impl[property] = val end
-        else 
-          print("G -> P", index, property)
-          return function() return impl[property] end
-        end
-      elseif index == 'extensionMethod' then
-          print("EXM", index, property)
-          return function(name, fn) impl[name] = fn end
-      elseif proxy.parent then -- try invoke parent 
-        print("P", index, property)
-        return proxy.parent[index]
-      elseif index == '__init' then -- asking for nonexisting c-tor
-        print("C", index, property)
-        return nil
-      end
-      error("request nonexisting attribute: "..index)
---]]      
     end,
 
     __newindex = function(instance, index, value)

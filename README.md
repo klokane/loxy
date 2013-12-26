@@ -10,3 +10,6 @@ TODO:
  * allow memoize getters
  * allow "protected" attrs via "_" prefix
 
+FIXME:
+------
+ * set attr to nil

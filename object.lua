@@ -1,5 +1,6 @@
 require 'signal'
 
+local print_ = print
 local print = function() end
 
 local ctor = '__init'
@@ -65,14 +66,16 @@ end
  * access parent methods
  * check extension method
  * allow memoize getters
+ * allow "protected" attrs via "-" prefix
 --]]
 
-local object_manipulators = function(instance)
+local object_manipulators = function(instance, strict)
+  if strict == nil then strict = true end
   local proxy = getmetatable(instance)
-  local impl = proxy.impl
+  local impl = proxy and proxy.impl or nil
   local rx = object_reflection(impl)
 
-  if not proxy or not impl or not rx then
+  if strict and (not proxy or not impl or not rx) then
     error('Is not proxy object: '..tostring(instance))
   end
 
@@ -88,13 +91,13 @@ local object_proxy = function(impl, parent)
   if parent_mt then setmetatable(impl, { __index = parent_mt.impl }) end
 
   local proxy = {
-    __index = function(table, index) 
-      local proxy, impl, rx = object_manipulators(table) 
-      print("R:", table, proxy, impl, index, type(impl[index]))
+    __index = function(instance, index) 
+      local proxy, impl, rx = object_manipulators(instance) 
+      print("R:", instance, proxy, impl, index, type(impl[index]))
       --print(index, rx:hasProperty(index), rx:hasMethod(index), rx:hasGetter(index))
       if util.isSetter(index) and rx:hasMethod(index) and rx:hasProperty(util.toProperty(index)) then
         print("S + P", index)
-        return function(proxy,val) impl[index](impl,val) end
+        return function(instance,val) impl[index](impl,val) end
       elseif rx:hasGetter(index) and rx:hasProperty(index) then 
         print("G + P")
         error('undefined behavior, there is defined both property and getter for: '.. index)
@@ -109,11 +112,13 @@ local object_proxy = function(impl, parent)
         local property = util.toProperty(index)
         if util.isSetter(index) then
           print("S -> P", index, property)
-          return function(proxy,val) impl[property] = val end
+          return function(instance,val) impl[property] = val end
         else 
           print("G -> P", index, property)
           return function() return impl[property] end
         end
+      elseif index == 'is_a' then
+        return function(instance,class) return is_a(instance, class) end
       end
       error("read unknown attribute: "..index)
 
@@ -153,15 +158,15 @@ local object_proxy = function(impl, parent)
 --]]      
     end,
 
-    __newindex = function(table, index, value)
-      local proxy, impl, rx = object_manipulators(table) 
-      print("W:", table, proxy, impl, index, type(impl[index]), value)
+    __newindex = function(instance, index, value)
+      local proxy, impl, rx = object_manipulators(instance) 
+      print("W:", instance, proxy, impl, index, type(impl[index]), value)
       if rx:hasSetter(index) then
         print("S")
         local setter = util.toSetter(index)
         impl[setter](impl,value)
         return
-      elseif impl[index] then
+      elseif impl[index] ~= nil then -- get direct property/method
         print("D")
         impl[index] = value
         return 
@@ -230,7 +235,18 @@ object = function(parent, impl)
   impl = impl or {}
 
   local inst = setmetatable({}, object_proxy(impl, parent))
-  print("C:",impl,inst,getmetatable(o), parent)
+  print("C:",impl,inst,getmetatable(inst), parent)
   return inst
 end
 
+
+is_a = function(object, class)
+  local o_p, o_i = object_manipulators(object, false)
+  local c_p, c_i = object_manipulators(class, false)
+
+  if not o_p or not o_i or not c_p or not c_i then -- it is not pobably loxy inst
+    return false
+  end
+
+  return c_i == getmetatable(o_i).__index
+end

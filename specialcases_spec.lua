@@ -12,17 +12,6 @@ describe("object special cases", function()
     assert.is.equal(c.no, false)
   end)
 
---[[
-  it("handle override __tostring", function()
-    local c = object({
-      __tostring = function(self)
-        return "overided"
-      end
-    })()
-    assert.is.equal(tostring(c), 'overided')
-  end)
---]]
-
   it("c-tor should create own instance", function()
     local C = object({ a = 0 })
 
@@ -59,8 +48,8 @@ describe("object special cases", function()
     assert.is.equal(c2.a, 2)
   end)
 
-  local C
   it("testing #clone", function()
+    local C
     C = object({
       a = 'none',
       clone = function(self)
@@ -85,6 +74,39 @@ describe("object special cases", function()
     assert.is.equal(c.a,'cloned')
     assert.is.equal(o.a,'origin')
     assert.is.equal(C.a,'none')
+  end)
+
+  it("#clone false attribute", function()
+    local C
+    C = object({
+      no = false,
+      clone = function(self)
+        C{ no = self.no }
+      end,
+    })
+
+    local c = C()
+    local d = c:clone()
+
+    assert.is.equal(c.no, false)
+    assert.is.equal(c.no, false)
+  end)
+
+  it("set bool attr", function()
+    local C
+    C = object({
+      no = false,
+      clone = function(self)
+        C{ no = self.no }
+      end,
+    })
+
+    local c = C()
+    assert.is.equal(c.no, false)
+    c.no = true
+    assert.is.equal(c.no, true)
+    c.no = false
+    assert.is.equal(c.no, false)
   end)
 
 end)

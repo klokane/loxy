@@ -60,15 +60,6 @@ local object_reflection = function(obj)
   }
 end
 
---[[
- TODO:
- * :is_a()
- * access parent methods
- * check extension method
- * allow memoize getters
- * allow "protected" attrs via "-" prefix
---]]
-
 local object_manipulators = function(instance, strict)
   if strict == nil then strict = true end
   local proxy = getmetatable(instance)

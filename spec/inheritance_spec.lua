@@ -1,13 +1,72 @@
 require 'busted'
 require 'object'
 
-describe("object inheritance concepts", function()
+describe('object inheritance concept', function()
+  local m,B,C,D,E,x,t
+  before_each(function()
+    x = 0
+    t = {}
+    m = function() x = x + 1 end
+    B = { a = 0, m = m, t = t }
+    C = object(B)
+    D = object(C,{ c = 3 })
+    E = object(D,{ c = 4 })
+  end)
+
+  it('property is inerited throu ful hierarchy',function()
+    assert.is.equal(B.a,0)
+    assert.is.equal(C.a,0)
+    assert.is.equal(D.a,0)
+    assert.is.equal(E.a,0)
+  end)
+
+  it('method is changed due to closure is returned',function()
+    assert.is.equal(B.m,m)
+    assert.is_not.equal(C.m,m)
+    assert.is_not.equal(C.m,C.m)
+  end)
+
+  it('table is shared among instances',function()
+    assert.is.equal(B.t,t)
+    assert.is.equal(C.t,t)
+    assert.is.equal(D.t,t)
+    assert.is.equal(E.t,t)
+
+    -- warning, if you do not create own instance of table 
+    -- in c-tor it will be propagated throu all shared instances
+    D.t.a = 4
+    assert.is.equal(B.t.a,4)
+  end)
+
+  it('accesing property in decendant, will throw', function()
+    assert.has.errors(function() local v = C.c end
+      ,"read unknown attribute: c"
+    )
+  end)
+  it('override property in decendant, will not touch parent', function()
+    assert.is.equal(D.c,3)
+    assert.is.equal(E.c,4)
+  end)
+end)
+
+local ts = require 'ml'.tstring
+
+describe("instance creating concepts", function()
+
+  it('instance has props/method from parent', function()
+    local C = object({ a = 1, m = function(self) return self.a + 1 end })
+    local c = C()
+
+    assert.is.equal(c.a,1)
+    assert.is.equal(c:m(),2)
+  end)
 
   it('write attribute must not change other instances or class behavior', function()
     local C = object({ a = 0 })
     local c1 = C()
-    c1.a = 1
     local c2 = C()
+
+    c1.a = 1
     c2.a = 2
 
     assert.is.equal( C.a,0)
@@ -79,7 +138,9 @@ describe("object inheritance concepts", function()
     assert.is.equal(filledCircle:draw(), 'draw none circle') -- invoke overrided draw()
 
   end)
+end)
 
+describe("constructor behavior", function()
   it('has default construction via table', function()
     local C = object({ a = 0 })
     local c1 = C{ a = 1 }

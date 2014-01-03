@@ -1,14 +1,13 @@
 require 'signal'
 
-local print_ = print
-local print = function() end
-
 local ctor = '__init'
 local overridable_metamethods = { 
   '__tostring', '__concat',
   '__add', '__mul', '__sub', '__div', '__unm', '__pow',
   '__eq', '__lt', '__le',
 }
+
+local print = function() end
 
 local s_upper = string.upper
 local s_lower = string.lower
@@ -104,8 +103,6 @@ local object_manipulators = function(instance, strict)
   return proxy, impl, rx
 end
 
-
-
     local M__newindex = function(instance, index, value)
       local proxy, impl, rx = object_manipulators(instance) 
       --print("W:", instance, proxy, impl, index, type(impl[index]), value)
@@ -122,8 +119,22 @@ end
       error("write unknown attribute: "..index)
     end
 
-    local M__index = function(instance, index) 
-      local proxy, impl, rx = object_manipulators(instance) 
+    local M__index = function(instance, attr) 
+      --local proxy, impl, rx = object_manipulators(instance) 
+      local proxy = getmetatable(instance)
+      local impl = proxy and proxy.impl or nil
+      local rx = proxy and proxy.reflection or nil
+
+      local index = impl[attr]
+      print("R:", instance, proxy, impl, attr, type(impl[attr]))
+
+      if type(index) == 'function' then -- it is direct method call (setter include)
+        return function(self,...) return index(impl , ...)  end
+      elseif index ~= nil then -- it is property
+        return impl[index]
+      else -- no method, no property look for other solution
+      end
+--[[
 
       --local hm,hp = rx:hasMethod(index), rx:hasProperty(index)
 
@@ -154,23 +165,89 @@ end
       elseif index == 'is_a' then
         return function(instance,class) return is_a(instance, class) end
       end
-      error("read unknown attribute: "..index)
+--]]
+      error("read unknown attribute: "..attr)
     end
 
 
 local object_proxy = function(impl, parent)
   -- error if impl has mt to avoid strange behavior
-  if getmetatable(impl) then error("implementation has already parent: "..impl) end
+  if getmetatable(impl) then error("implementation has already parent: " .. impl) end
   -- impl inheritance througth mt._index
   local parent_mt = getmetatable(parent)
   if parent_mt then setmetatable(impl, { __index = parent_mt.impl }) end
 
   local proxy = {
 
-    __newindex = M__newindex,
-    __index = M__index,
+    __index = function(instance, attr) 
+      local proxy = getmetatable(instance)
+      local impl = proxy.impl
+      local rx = proxy.reflection
 
-    __call = function(class, ...)
+      local index = impl[attr]
+
+      print("R:", instance, impl, attr, type(index))
+
+      if type(index) == 'function' then -- it is direct method call (setter include)
+        print("DF") -- we must return closure, we must send impl eas 'self' instead of instance
+        return function(self,...) return index(impl , ...)  end
+      elseif index ~= nil then -- it is property
+        print("DP")
+        return index
+      else -- no method, no property look for other solution
+        print("O")
+      end
+      error("read unknown attribute: "..attr)
+    end,
+
+    __newindex = function(instance, attr, value) 
+      local proxy = getmetatable(instance)
+      local impl = proxy.impl
+      local rx = proxy.reflection
+
+      local index = impl[attr]
+      if index ~= nil then
+        impl[attr] = value
+        return
+      end
+
+      --print("W:", instance, impl, attr, type(index), value)
+      --local setterName = util.toSetter(attr)
+      --local setter = impl[setterName]
+
+      --if setter ~= nil then
+      --  setter(impl,value)
+      --  return
+      --elseif index ~= nil then
+      --  index = value
+      --  return
+      --end
+
+      error("write unknown attribute: "..attr)
+    end,
+
+    __call = function(parent, ...)
+      local impl
+      local hasInit = getmetatable(parent)['impl']['__init'] ~= nil
+      if not hasInit and #arg == 1 and type(arg[1]) == 'table' then
+        impl = arg[1]
+      else
+        impl = {}
+      end
+
+      instance = object(parent, impl)
+
+      if hasInit then -- explicit c-tor
+        parent['__init'](instance, unpack(arg))
+      end
+
+      -- disable c-tor for instance
+      getmetatable(instance).__call = nil
+      
+      print("I:",parent, "=>", instance)
+      return instance
+
+ --[[
       local instance = object(class,{})
       local c_mt = getmetatable(class)
       local c = c_mt.impl[ctor]
@@ -196,6 +273,7 @@ local object_proxy = function(impl, parent)
 
       --print("I:",class, instance, ">", arg)
       return instance
+--]]      
     end,
 
     impl = impl,

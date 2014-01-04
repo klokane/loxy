@@ -53,6 +53,7 @@ local util = {
   end,
 }
 
+--[[
 local object_reflection = function(obj)
   return { -- todo cache results
     obj = obj,
@@ -89,19 +90,13 @@ local object_reflection = function(obj)
     end,
   }
 end
+--]]
 
-local object_manipulators = function(instance, strict)
-  if strict == nil then strict = true end
-
+local object_manipulators = function(instance)
   local proxy = getmetatable(instance)
   local impl = proxy and proxy.impl or nil
-  local rx = proxy and proxy.reflection or nil
 
-  if strict and (not proxy or not impl or not rx) then
-    error('Is not proxy object: '..tostring(instance))
-  end
-
-  return proxy, impl, rx
+  return proxy, impl
 end
 
 local object_proxy = function(impl, parent)
@@ -116,7 +111,6 @@ local object_proxy = function(impl, parent)
     __index = function(instance, attr) 
       local proxy = getmetatable(instance)
       local impl = proxy.impl
-      local rx = proxy.reflection
 
       local index = impl[attr]
 
@@ -175,7 +169,6 @@ local object_proxy = function(impl, parent)
     __newindex = function(instance, attr, value) 
       local proxy = getmetatable(instance)
       local impl = proxy.impl
-      local rx = proxy.reflection
 
       --print("W:", instance, impl, attr, type(index), value)
       local setter_name = util.toSetter(attr)
@@ -231,7 +224,6 @@ local object_proxy = function(impl, parent)
     end,
 
     impl = impl,
-    reflection = object_reflection(impl),
   }
 
 
@@ -269,8 +261,8 @@ end
 
 
 is_a = function(object, class)
-  local o_p, o_i = object_manipulators(object, false)
-  local c_p, c_i = object_manipulators(class, false)
+  local o_p, o_i = object_manipulators(object)
+  local c_p, c_i = object_manipulators(class)
 
   if not o_p or not o_i or not c_p or not c_i then -- it is not pobably loxy inst
     return false

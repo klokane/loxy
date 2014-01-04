@@ -20,10 +20,10 @@ describe('object inheritance concept', function()
     assert.is.equal(E.a,0)
   end)
 
-  it('method is inherited',function()
+  it('method is changed due to closure is returned',function()
     assert.is.equal(B.m,m)
-    assert.is.equal(C.m,m)
-    assert.is.equal(C.m,C.m)
+    assert.is_not.equal(C.m,m)
+    assert.is_not.equal(C.m,C.m)
   end)
 
   it('table is shared among instances',function()
@@ -140,6 +140,22 @@ describe("instance creating concepts", function()
   end)
 
   it('allow correct invocation via both ":" and "."', function()
+    local s,i,d
+    local C = object({
+      static = function(v) s = v end,
+      dynamic = function(self, v) i,d = self,v end,
+    })
+
+    local c = C()
+
+    C.static('s')
+    C:dynamic('d')
+
+    assert.is.equal(s,'s')
+    assert.is.equal(i,getmetatable(C).impl)
+    assert.is.equal(d,'d')
+
+
   end)
 end)
 

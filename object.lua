@@ -7,6 +7,7 @@ local overridable_metamethods = {
   '__eq', '__lt', '__le',
 }
 
+local print_ = print
 local print = function() end
 
 local s_upper = string.upper
@@ -128,10 +129,13 @@ local object_proxy = function(impl, parent)
           if impl[prop_name] ~= nil then
             error('undefined behavior, there is defined both property and getter for: '.. attr)
           end
-        elseif s_match(attr,"^set%u") then
-          return function(self,...) return index(impl , ...)  end
         end
-        return index 
+        return function(self, ...)
+          if self == instance then 
+            return index(impl, ...)
+          end
+          return index(self,...)  
+        end
       elseif attr == 'is_a' then
         return function(instance,class) return is_a(instance, class) end
       elseif index ~= nil then -- it is property

@@ -230,8 +230,8 @@ local object_proxy = function(impl, parent)
 
     __call = function(parent, ...)
       local impl
-      local hasInit = getmetatable(parent)['impl']['__init'] ~= nil
-      if not hasInit and #arg == 1 and type(arg[1]) == 'table' then
+      local init = getmetatable(parent)['impl']['__init'] 
+      if not init and #arg == 1 and type(arg[1]) == 'table' then
         impl = arg[1]
       else
         impl = {}
@@ -239,8 +239,8 @@ local object_proxy = function(impl, parent)
 
       instance = object(parent, impl)
 
-      if hasInit then -- explicit c-tor
-        parent['__init'](instance, unpack(arg))
+      if init then -- explicit c-tor
+        init(instance, unpack(arg))
       end
 
       -- disable c-tor for instance

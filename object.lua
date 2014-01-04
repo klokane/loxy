@@ -15,6 +15,10 @@ local s_lower = string.lower
 local s_gsub  = string.gsub
 local s_match = string.match
 
+local pairs = pairs
+local setmetatable = setmetatable
+local getmetatable = getmetatable
+
 local function memoize (f)
   local mem = {}
   setmetatable(mem, {__mode = "kv"})

@@ -64,8 +64,8 @@ describe("testing object syntax sugar behaviors", function()
       })({ x = 1 })
     end)
 
-    it('setter is not invoked while init', function()
-      assert.is.equal(o.x,1)
+    it('setter is invoked while implicit init', function()
+      assert.is.equal(o.x,2)
     end)
 
     it('setter should modify value of property', function()

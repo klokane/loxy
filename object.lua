@@ -190,21 +190,18 @@ local object_proxy = function(impl, parent)
     end,
 
     __call = function(class, ...)
-      local impl
+      local impl = {}
       local cimpl = getmetatable(class)['impl']
       local init = cimpl[constructor_name] 
-
-      -- TODO: 
-      -- add option copy attrs in implicit c-tor 
-      -- instead of direct use as impl
+      local instance = object(class, impl)
 
       if not init and #arg == 1 and type(arg[1]) == 'table' then
-        impl = arg[1]
-      else
-        impl = {}
+        local c = arg[1]
+        for k,v in pairs(c) do
+          instance[k] = v
+        end
       end
 
-      local instance = object(class, impl)
 
       if init then -- explicit c-tor
         init(instance, unpack(arg))

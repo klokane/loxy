@@ -191,6 +191,8 @@ local object_proxy = function(impl, parent)
       if type(index) == 'function' then -- it is direct method call (setter include)
         print("DF") -- we must return closure, we must send impl eas 'self' instead of instance
         return function(self,...) return index(impl , ...)  end
+      elseif attr == 'is_a' then
+        return function(instance,class) return is_a(instance, class) end
       elseif index ~= nil then -- it is property
         print("DP")
         return index

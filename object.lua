@@ -230,7 +230,8 @@ local object_proxy = function(impl, parent)
 
     __call = function(class, ...)
       local impl
-      local init = getmetatable(class)['impl']['__init'] 
+      local cimpl = getmetatable(class)['impl']
+      local init = cimpl['__init'] 
       if not init and #arg == 1 and type(arg[1]) == 'table' then
         impl = arg[1]
       else
@@ -245,6 +246,15 @@ local object_proxy = function(impl, parent)
 
       -- disable c-tor for instance
       getmetatable(instance).__call = nil
+
+      -- connect overridable metamethods to proxy
+      local proxy = getmetatable(instance)
+      for _,method in pairs(overridable_metamethods) do
+        local mm = cimpl[method]
+        if mm ~= nil then
+          proxy[method] = mm
+        end
+      end
       
       print("I:",class, "=>", instance)
       return instance

@@ -7,7 +7,7 @@ local overridable_metamethods = {
   '__eq', '__lt', '__le',
 }
 
-local print = function() end
+--local print = function() end
 
 local s_upper = string.upper
 local s_lower = string.lower
@@ -131,6 +131,7 @@ end
       if type(index) == 'function' then -- it is direct method call (setter include)
         return function(self,...) return index(impl , ...)  end
       elseif index ~= nil then -- it is property
+        -- add check for getter
         return impl[index]
       else -- no method, no property look for other solution
       end
@@ -189,15 +190,47 @@ local object_proxy = function(impl, parent)
       print("R:", instance, impl, attr, type(index))
 
       if type(index) == 'function' then -- it is direct method call (setter include)
-        print("DF") -- we must return closure, we must send impl eas 'self' instead of instance
+        print("DF") 
+        if s_match(attr,"^get%u") then -- ask for getter check duplicit property
+          local prop_name = util.toProperty(attr)
+          if impl[prop_name] ~= nil then
+            error('undefined behavior, there is defined both property and getter for: '.. attr)
+          end
+        end
+        -- we must return closure, we must send impl eas 'self' instead of instance
         return function(self,...) return index(impl , ...)  end
       elseif attr == 'is_a' then
         return function(instance,class) return is_a(instance, class) end
       elseif index ~= nil then -- it is property
+        local getter_name = util.toGetter(attr)
+        if impl[getter_name] ~= nil then
+          error('undefined behavior, there is defined both property and getter for: '.. attr)
+        end
         print("DP")
         return index
       else -- no method, no property look for other solution
-        print("O")
+        if s_match(attr,"^get%u") then -- ask for getter -> look for propery
+          local prop_name = util.toProperty(attr)
+          local prop = impl[prop_name]
+          print("G->P:",attr,prop_name)
+          if prop ~= nil then
+            return function() return prop end
+          end
+        elseif s_match(attr,"^set%u") then -- ask for setter -> look for propery
+          local prop_name = util.toProperty(attr)
+          print("S->P:",attr,prop_name)
+          if impl[prop_name] ~= nil then
+            return function(_,val) impl[prop_name] = val  end
+          end
+        else -- asking for property -> look for getter
+          local getter_name = util.toGetter(attr)
+          print("P->G",attr,getter_name)
+          local getter = impl[getter_name]
+          if getter ~= nil then
+            return getter(impl)
+          end
+        end
+        print('N/A')
       end
       error("read unknown attribute: "..attr)
     end,
@@ -207,23 +240,17 @@ local object_proxy = function(impl, parent)
       local impl = proxy.impl
       local rx = proxy.reflection
 
-      local index = impl[attr]
-      if index ~= nil then
+      print("W:", instance, impl, attr, type(index), value)
+      local setter_name = util.toSetter(attr)
+      local setter = impl[setter_name]
+
+      if setter ~= nil then
+        setter(impl,value)
+        return
+      elseif impl[attr] ~= nil then
         impl[attr] = value
         return
       end
-
-      --print("W:", instance, impl, attr, type(index), value)
-      --local setterName = util.toSetter(attr)
-      --local setter = impl[setterName]
-
-      --if setter ~= nil then
-      --  setter(impl,value)
-      --  return
-      --elseif index ~= nil then
-      --  index = value
-      --  return
-      --end
 
       error("write unknown attribute: "..attr)
     end,

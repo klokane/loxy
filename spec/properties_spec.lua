@@ -1,8 +1,6 @@
 require 'busted'
 require 'object'
 
---tostring = require 'ml'.tstring
-
 describe("testing object syntax sugar behaviors", function()
 
   local CIRCLE, circle

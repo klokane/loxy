@@ -20,10 +20,10 @@ describe('object inheritance concept', function()
     assert.is.equal(E.a,0)
   end)
 
-  it('method is changed due to closure is returned',function()
+  it('method is inherited',function()
     assert.is.equal(B.m,m)
-    assert.is_not.equal(C.m,m)
-    assert.is_not.equal(C.m,C.m)
+    assert.is.equal(C.m,m)
+    assert.is.equal(C.m,C.m)
   end)
 
   it('table is shared among instances',function()
@@ -138,6 +138,9 @@ describe("instance creating concepts", function()
     assert.is.equal(filledCircle:draw(), 'draw none circle') -- invoke overrided draw()
 
   end)
+
+  it('allow correct invocation via both ":" and "."', function()
+  end)
 end)
 
 describe("constructor behavior", function()
@@ -183,4 +186,5 @@ describe("constructor behavior", function()
 
   end)
 end)
+
 

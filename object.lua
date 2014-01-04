@@ -128,9 +128,10 @@ local object_proxy = function(impl, parent)
           if impl[prop_name] ~= nil then
             error('undefined behavior, there is defined both property and getter for: '.. attr)
           end
+        elseif s_match(attr,"^set%u") then
+          return function(self,...) return index(impl , ...)  end
         end
-        -- we must return closure, we must send impl eas 'self' instead of instance
-        return function(self,...) return index(impl , ...)  end
+        return index 
       elseif attr == 'is_a' then
         return function(instance,class) return is_a(instance, class) end
       elseif index ~= nil then -- it is property

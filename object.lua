@@ -1,13 +1,13 @@
 require 'signal'
 
-local ctor = '__init'
+local constructor_name = '__init'
 local overridable_metamethods = { 
   '__tostring', '__concat',
   '__add', '__mul', '__sub', '__div', '__unm', '__pow',
   '__eq', '__lt', '__le',
 }
 
---local print = function() end
+local print = function() end
 
 local s_upper = string.upper
 local s_lower = string.lower
@@ -83,8 +83,8 @@ local object_reflection = function(obj)
     end,
 
     hasConstructor = function(self)
-      return rawget(self.obj,ctor) ~= nil
-      --return self:hasMethod(ctor)
+      return rawget(self.obj,constructor_name) ~= nil
+      --return self:hasMethod(constructor_name)
     end,
   }
 end
@@ -258,7 +258,7 @@ local object_proxy = function(impl, parent)
     __call = function(class, ...)
       local impl
       local cimpl = getmetatable(class)['impl']
-      local init = cimpl['__init'] 
+      local init = cimpl[constructor_name] 
       if not init and #arg == 1 and type(arg[1]) == 'table' then
         impl = arg[1]
       else
@@ -289,7 +289,7 @@ local object_proxy = function(impl, parent)
  --[[
       local instance = object(class,{})
       local c_mt = getmetatable(class)
-      local c = c_mt.impl[ctor]
+      local c = c_mt.impl[constructor_name]
       if c then
         c(instance, unpack(arg))
       elseif #arg == 1 and type(arg[1]) == 'table' then

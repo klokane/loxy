@@ -192,7 +192,12 @@ local object_proxy = function(impl, parent)
     __call = function(class, ...)
       local impl = {}
       local cimpl = getmetatable(class)['impl']
-      local init = cimpl[constructor_name] 
+      local init = cimpl[constructor_name]
+
+      if not init and #arg == 2 and type(arg[1]) == 'table' and arg[2] == false then
+        impl = arg[1]
+      end
+
       local instance = object(class, impl)
 
       if not init and #arg == 1 and type(arg[1]) == 'table' then

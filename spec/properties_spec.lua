@@ -78,6 +78,18 @@ describe("testing object syntax sugar behaviors", function()
       assert.is.equal(o.x, 6)
     end)
 
+    it('allow bypass implicit ctor invocation, instead use agr as impl',function()
+      local o = object({
+        x = 0,
+        setX = function(self, x) self.x = x + 1 end,
+      })({ x = 1 },false)
+      assert.is.equal(o.x,1)
+      o:setX(3)
+      assert.is.equal(o.x, 4)
+      o.x = 5 
+      assert.is.equal(o.x, 6)
+    end)
+
   end)
 
   describe("Testing getter && property functionality", function()

@@ -228,16 +228,16 @@ local object_proxy = function(impl, parent)
       error("write unknown attribute: "..attr)
     end,
 
-    __call = function(parent, ...)
+    __call = function(class, ...)
       local impl
-      local init = getmetatable(parent)['impl']['__init'] 
+      local init = getmetatable(class)['impl']['__init'] 
       if not init and #arg == 1 and type(arg[1]) == 'table' then
         impl = arg[1]
       else
         impl = {}
       end
 
-      local instance = object(parent, impl)
+      local instance = object(class, impl)
 
       if init then -- explicit c-tor
         init(instance, unpack(arg))
@@ -246,7 +246,7 @@ local object_proxy = function(impl, parent)
       -- disable c-tor for instance
       getmetatable(instance).__call = nil
       
-      print("I:",parent, "=>", instance)
+      print("I:",class, "=>", instance)
       return instance
 
  --[[

@@ -119,10 +119,10 @@ local object_proxy = function(impl, parent)
 
       local index = impl[attr]
 
-      print("R:", instance, impl, attr, type(index))
+      --print("R:", instance, impl, attr, type(index))
 
       if type(index) == 'function' then -- it is direct method call (setter include)
-        print("DF") 
+        --print("DF") 
         if s_match(attr,"^get%u") then -- ask for getter check duplicit property
           local prop_name = util.toProperty(attr)
           if impl[prop_name] ~= nil then
@@ -138,31 +138,31 @@ local object_proxy = function(impl, parent)
         if impl[getter_name] ~= nil then
           error('undefined behavior, there is defined both property and getter for: '.. attr)
         end
-        print("DP")
+        --print("DP")
         return index
       else -- no method, no property look for other solution
         if s_match(attr,"^get%u") then -- ask for getter -> look for propery
           local prop_name = util.toProperty(attr)
           local prop = impl[prop_name]
-          print("G->P:",attr,prop_name)
+          --print("G->P:",attr,prop_name)
           if prop ~= nil then
             return function() return prop end
           end
         elseif s_match(attr,"^set%u") then -- ask for setter -> look for propery
           local prop_name = util.toProperty(attr)
-          print("S->P:",attr,prop_name)
+          --print("S->P:",attr,prop_name)
           if impl[prop_name] ~= nil then
             return function(_,val) impl[prop_name] = val  end
           end
         else -- asking for property -> look for getter
           local getter_name = util.toGetter(attr)
-          print("P->G",attr,getter_name)
+          --print("P->G",attr,getter_name)
           local getter = impl[getter_name]
           if getter ~= nil then
             return getter(impl)
           end
         end
-        print('N/A')
+        --print('N/A')
       end
       error("read unknown attribute: "..attr)
     end,
@@ -172,7 +172,7 @@ local object_proxy = function(impl, parent)
       local impl = proxy.impl
       local rx = proxy.reflection
 
-      print("W:", instance, impl, attr, type(index), value)
+      --print("W:", instance, impl, attr, type(index), value)
       local setter_name = util.toSetter(attr)
       local setter = impl[setter_name]
 
@@ -191,6 +191,11 @@ local object_proxy = function(impl, parent)
       local impl
       local cimpl = getmetatable(class)['impl']
       local init = cimpl[constructor_name] 
+
+      -- TODO: 
+      -- add option copy attrs in implicit c-tor 
+      -- instead of direct use as impl
+
       if not init and #arg == 1 and type(arg[1]) == 'table' then
         impl = arg[1]
       else
@@ -215,7 +220,7 @@ local object_proxy = function(impl, parent)
         end
       end
       
-      print("I:",class, "=>", instance)
+      --print("I:",class, "=>", instance)
       return instance
 
     end,

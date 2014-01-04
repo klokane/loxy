@@ -237,7 +237,7 @@ local object_proxy = function(impl, parent)
         impl = {}
       end
 
-      instance = object(parent, impl)
+      local instance = object(parent, impl)
 
       if init then -- explicit c-tor
         init(instance, unpack(arg))

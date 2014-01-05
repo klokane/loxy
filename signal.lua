@@ -19,10 +19,6 @@ signal = {
       __call = function(t, ...)
         return t:emit(...)
       end,
-
-      __concat = function(t, f)
-        t:connect(f)
-      end
       }
     )
   end

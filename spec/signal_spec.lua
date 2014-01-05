@@ -5,7 +5,7 @@ describe('testing signal functionality', function()
 
  local s, v, f
  before_each(function()
-    s = signal.new()
+    s = signal()
     v = 0
     f = function(val) v = val end
  end)

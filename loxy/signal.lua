@@ -1,4 +1,4 @@
-require 'callback'
+require 'loxy.callback'
 
 --[[
 -- Marshaller has defined interface (contract)

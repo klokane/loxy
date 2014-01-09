@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 describe('Handle special case if attr set to nil',function()
   local C

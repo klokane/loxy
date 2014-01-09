@@ -1,4 +1,4 @@
-require 'signal'
+require 'loxy.signal'
 
 local constructor_name = '__init'
 local overridable_metamethods = { 

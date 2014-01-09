@@ -1,5 +1,5 @@
 require 'busted'
-require 'signal'
+require 'loxy.signal'
 
 describe('testing signal functionality', function()
 

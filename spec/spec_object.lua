@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 --tostring = require 'ml'.tstring
 describe("object basic concepts", function()

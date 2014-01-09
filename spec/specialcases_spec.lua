@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 describe("object special cases", function()
 

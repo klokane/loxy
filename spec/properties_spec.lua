@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 describe("testing object syntax sugar behaviors", function()
 

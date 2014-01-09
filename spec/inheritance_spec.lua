@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 describe('object inheritance concept', function()
   local m,B,C,D,E,x,t

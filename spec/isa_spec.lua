@@ -1,5 +1,5 @@
 require 'busted'
-require 'object'
+require 'loxy'
 
 describe("querying object type througth is_a()", function()
 

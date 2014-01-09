@@ -1,5 +1,5 @@
 require 'busted'
-require 'callback'
+require 'loxy.callback'
 
 describe('testing callback functionality', function()
 

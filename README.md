@@ -369,7 +369,10 @@ There are two preddefined marshalers:
   * __marshaller.last__ - signal emit will return result of last callback
   * __marshaller.table__ - signal emit will return table with result of every one registered callback
 
-    sl = signal(marshaller.last)
+
+Last value marshaller usage:
+
+    sl = signal(marshaller.last)        -- it is equal to call signal() w/o parameter
     sl:connect(function() return 1 end)
     sl:connect(function() return 2 end)
     sl:connect(function() return 3 end)

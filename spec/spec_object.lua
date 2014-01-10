@@ -17,13 +17,13 @@ describe("object basic concepts", function()
       name = 'circle',
       radius = 0,
       getArea = function(self)
-        return self.radius * 3.14
+        return self.radius^2 * 3.14
       end
     })
 
     local c = circle{ radius = 10 } -- create instance of cicle
     assert.is.equal(c:draw(), 'draw circle') -- try to invoke parent
-    assert.is.equal(c.area, 10*3.14)
+    assert.is.equal(c.area, 10^2*3.14)
 
     local filledCircle = object(circle,{ -- inherit from cicrle, but override draw
       fill = 'none',
@@ -72,7 +72,7 @@ describe("testing object syntax sugar behaviors", function()
     circle = object({
       radius = 0,
       getArea = function(self)
-        return self.radius * 3.14
+        return self.radius^2 * 3.14
       end
     })({ radius = 10 })
   end)
@@ -198,7 +198,7 @@ describe("testing object syntax sugar behaviors", function()
       circle = object({
         radius = 10,
         getArea = function(self)
-          return self.radius * 3.14
+          return self.radius^2 * 3.14
         end
       })()
     end)

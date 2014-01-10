@@ -8,7 +8,7 @@ describe("testing object syntax sugar behaviors", function()
     CIRCLE = object({
       radius = 0,
       getArea = function(self)
-        return self.radius * 3.14
+        return self.radius^2 * 3.14
       end
     })
     circle = CIRCLE({ radius = 10 })
@@ -16,7 +16,7 @@ describe("testing object syntax sugar behaviors", function()
 
   describe("Testing props/getter/setter", function()
     it('should call method of object', function()
-      assert.is.equal(circle:getArea(), 3.14 * 10)
+      assert.is.equal(circle:getArea(), 3.14 * 10^2)
     end)
 
     it('should return property', function()
@@ -24,7 +24,7 @@ describe("testing object syntax sugar behaviors", function()
     end)
 
     it('should handle magic property via getter', function()
-      assert.is.equal(circle.area, 3.14 * 10)
+      assert.is.equal(circle.area, 3.14 * 10^2)
     end)
  
     it('should handle magic getter for existing property', function()
@@ -166,7 +166,7 @@ describe("testing object syntax sugar behaviors", function()
       circle = object({
         radius = 10,
         getArea = function(self)
-          return self.radius * 3.14
+          return self.radius^2 * 3.14
         end
       })()
     end)

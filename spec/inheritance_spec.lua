@@ -113,7 +113,7 @@ describe("instance creating concepts", function()
       name = 'circle',
       radius = 0,
       getArea = function(self)
-        return self.radius * 3.14
+        return self.radius^2 * 3.14
       end
     })
 
@@ -122,7 +122,7 @@ describe("instance creating concepts", function()
     assert.has.errors(function() c.radiator = 10 end)
     assert.is.equal(circle.radius, 0) -- check that class attr is not touched
     assert.is.equal(c.radius, 10)     -- check that instance has setted attr
-    assert.is.equal(c:getArea(), 10*3.14) -- check class is not changed
+    assert.is.equal(c:getArea(), 10^2*3.14) -- check class is not changed
     assert.is.equal(c:draw(), 'draw circle') -- try to invoke parent
 
     assert.is.equal(s:draw(), 'draw shape instance')

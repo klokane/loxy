@@ -125,7 +125,7 @@ local object_proxy = function(impl, parent)
         if s_match(attr,"^get%u") then -- ask for getter check duplicit property
           local prop_name = util.toProperty(attr)
           if impl[prop_name] ~= nil then
-            error('undefined behavior, there is defined both property and getter for: '.. attr)
+            error('undefined behavior, there are defined both property and getter for: '.. attr)
           end
         end
         return function(self, ...)

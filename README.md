@@ -1,8 +1,6 @@
 # LOXY
 
-__Loxy__ is short from 'Lua Object proXY'
-
-Usage:
+__Loxy__ is short coming from 'Lua Object ProXY'
 
 ## Define 'class'
 
@@ -21,29 +19,30 @@ Usage:
     circle = Circle()
     circle.radius = 10
 
-    area = circle:getArea() 
+    area = circle:getArea()
     assert(area == 10^2*PI)
 
-You can overwrite property `a` for instance in constructor:
+You can set value of `a` in instance of `c` in constructor:
 
-    circle = Circle{ radius = 10 }    
-    area = circle:getArea() 
+    circle = Circle{ radius = 10 }
+    area = circle:getArea()
     assert(area == 10^2*PI)
 
-More about constructor see later in section __Constructor__
+More about _constructors_ you can see in section __Constructor__
 
 ## Error on unknown member
 
-__Loxy__ will throw error if you try access undefined member (there is exception for setters/getters - see next section)
 There is difference between Loxy and traditional Lua access to undefined member
+__Loxy__ will throw `error` if you try access undefined member (exception are __setters/getters__ - see next section)
+
 
     t = {}
-    print(t.a)     -- it will be OK due to Lua returns nil for nonexisting attr
+    print(t.a)     -- it will be OK due to Lua returns 'nil' for nonexisting member
 
 but with __loxy__ you will get `error`.
 
-    o = ({})()     -- create instance of anonymous class - see section "Anonymous class"
-    print(o.a)     -- throw error "read unknown attribute: a"
+    o = object{}()  -- create instance of anonymous class - see section "Anonymous class"
+    print(o.a)      -- throw error "read unknown attribute: a"
 
 ## Setters/Getters - syntax sugar
 
@@ -53,11 +52,12 @@ In example with `Circle` you can access:
   - property `circle.radius` throught `circle:getRadius()` method. 
   - method `circle:getArea()` by property `cicrcle.area`
 
+
     circle = Circle{ radius = 10 }    
     assert( circle.area == 10 * PI)
     assert( circle:getRadius() == 10)
 
-Similar syntax sugar can by used for setters
+Similar syntax sugar can be used for setters
 
 We will extend our class `Circle` with setter:
 
@@ -118,7 +118,7 @@ You can avoid this limitation by using _property with diferent name_ (e.g starte
     
 ### Read only attribute
 
-By define getter only w/o property you are able to simulate Read Only attribute
+By define getter only w/o related property you are able to simulate Read Only attribute
 
     C = object({ 
       getConst = function() 
@@ -178,6 +178,7 @@ More complex example you can see in file `spec/inheritance_spec.lua`:
       fill = 'none',
       draw = function(self) return string.format("draw %s %s", self.fill, self.name) end,
     })
+    
     local fc = filledCircle({ fill = 'red' })
     assert.is.equal(fc:draw(), 'draw red circle') -- invoke overrided draw()
 
@@ -187,7 +188,7 @@ __Loxy__ provide two kinds of constructor mechanism.
 
 ### Implicit constructor
 
-Will just copy received table to object. If there are setters for attribute, implicit constructor invoke them.
+Copy members of table to object. If there is setter for attribute, implicit constructor invoke them.
 You can avoid __setter invocation in constructor call__ by second parameter `false` to constructor
 
     C = object({ 
@@ -203,12 +204,12 @@ You can avoid __setter invocation in constructor call__ by second parameter `fal
     local c2 = C{ a = 3 }  -- implicit constructor invoked
     assert(c2.a == 4)      -- assignment in constructor invoke setter mechanism if setter exists - it is default behavior
 
-    local c3 = C({ a = 3 }, false) -- avoid setters invocation while implicit c-tor
+    local c3 = C({ a = 3 }, false) -- avoid setter invocation while implicit c-tor
     assert(c3.a == 3)             
 
 ### Explicit c-tor
 
-You can define your own constructor by `__init()` method. In this case implicit constructor will not be used. Instead, all received params are sent to `__init()` method
+You can define your own constructor by `__init()` method. In this case implicit constructor will not be invoked. Instead, all received params are sent to `__init()` method
 
     C = object({ 
       a = 0, 
@@ -220,7 +221,7 @@ You can define your own constructor by `__init()` method. In this case implicit 
     local c = C(2)  -- this will invoke your __init() method instead of implicit constructor
     assert(c.a == 4)
 
-See, `__init()` will receive as first param `self`
+Invoked `__init()` will receive as first param `self` followed by all others param sent to constructor
 
 ## Override metamethods
 
@@ -236,12 +237,12 @@ __Loxy__ allows override metamethods:
     c = C{ name = 'instance of C' }
     print(c) -- will print: "I'm: instance of C"
 
-Accepted overrided metamethods are:
+Accepted overridable metamethods are:
 
   * strings:  `__tostring`, `__concat`,
   * arithmetic: `__add`, `__mul`, `__sub`, `__div`, `__unm`, `__pow`,
   * comparable: `__eq`, `__lt`, `__le`,
-}
+
 
 ## Runtime Type Indentification
 
@@ -301,11 +302,11 @@ you will connect some callback(s) to signal
     s:connect(function(arg) print(arg) end)
     s:connect(function(arg) print(arg + 1) end)
 
-and now by calling `signal:emit()` you will invoke all connected callbacks and send param `1` to them
+and now by calling `signal:emit()` you will invoke all connected callbacks and you can send some paramters to registered callbacks
 
     s:emit(1)
 
-There is additionaly syntax sugar for emitting via Lua `__call` metamethod
+There is additional syntax sugar for emitting via Lua `__call` metamethod
 
     s(1) -- it is equal to call s:emit(1)
 
@@ -359,7 +360,7 @@ output from emiting `s()` will be:
     loxy object method
     loxy object method - by name
 
-Params sent to `:connect()` are internally packed by `callback()` and later invoked by `callback:invoke()`
+Parameterss sent to `signal:connect()` are internally packed by `callback()` and later invoked by `callback:invoke()`
 
 You can see, in `ti`, `ts` `o` and `os` usage of instance callback. 
 In this case, there is additionaly sent `self` as fisrt param.
@@ -374,9 +375,9 @@ By marshalling mechanism you can receive returned value(s) from callback(s)
     r = s()
     assert(r == 1)
 
-Marshalling mechanism You will inject via parameter to `signal()`
+You can inject marshaller by parameter sent to `signal()`
 
-If you don't provide marshaller to `signal()`, then preddefined `marshaller.last` is used
+If you don't provide any marshaller to `signal()`, then preddefined `marshaller.last` is used
 
 There are two preddefined marshalers:
 
@@ -454,3 +455,4 @@ See pair of parenthesis at end of line - this will invoke constructor and  will 
  * allow memoize getters
  * ??? allow "protected" attrs via "_" prefix 
  * add extension methods
+ * reflection

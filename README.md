@@ -32,10 +32,10 @@ You can overwrite property `a` for instance in constructor:
 
 More about constructor see later in section __Constructor__
 
-## Error on unknown attribute/method
+## Error on unknown member
 
-__Loxy__ will throw error if you try access undefined attribute or method (there is exception for setters/getters - see next section)
-There is little difference between Loxy and traditional Lua access for attribute
+__Loxy__ will throw error if you try access undefined member (there is exception for setters/getters - see next section)
+There is difference between Loxy and traditional Lua access to undefined member
 
     t = {}
     print(t.a)     -- it will be OK due to Lua returns nil for nonexisting attr
@@ -43,21 +43,21 @@ There is little difference between Loxy and traditional Lua access for attribute
 but with __loxy__ you will get `error`.
 
     o = ({})()     -- create instance of anonymous class - see section "Anonymous class"
-    print(o.a)     -- but this throw error "read unknown attribute: d"
+    print(o.a)     -- throw error "read unknown attribute: a"
 
 ## Setters/Getters - syntax sugar
+
+__Loxy__ add some syntax sugar for object members:
 
 In example with `Circle` you can access:
   - property `circle.radius` throught `circle:getRadius()` method. 
   - method `circle:getArea()` by property `cicrcle.area`
 
-This is __Loxy__ syntax sugar provided for objects.
-
     circle = Circle{ radius = 10 }    
     assert( circle.area == 10 * PI)
     assert( circle:getRadius() == 10)
 
-Same syntax sugar is used for setters
+Similar syntax sugar can by used for setters
 
 We will extend our class `Circle` with setter:
 
@@ -115,7 +115,21 @@ You can avoid this limitation by using _property with diferent name_ (e.g starte
 
     c.attr = 6
     assert(c.attr == 6)
+    
+### Read only attribute
 
+By define getter only w/o property you are able to simulate Read Only attribute
+
+    C = object({ 
+      getConst = function() 
+        return "This is Read Only Member"
+      end
+    })
+    
+    c = C()
+    assert(c.const == "This is Read Only Member")
+    c.const = 1 -- throws error "write unknown attribute: const"
+    
 
 ## Inheritance
 

@@ -22,7 +22,7 @@ __Loxy__ is short coming from 'Lua Object ProXY'
     area = circle:getArea()
     assert(area == 10^2*PI)
 
-You can set value of `a` in instance of `c` in constructor:
+You can set value of member `a` for `Circle` instance `c` in constructor:
 
     circle = Circle{ radius = 10 }
     area = circle:getArea()
@@ -32,7 +32,7 @@ More about _constructors_ you can see in section __Constructor__
 
 ## Error on unknown member
 
-There is difference between Loxy and traditional Lua access to undefined member
+There is difference between __Loxy__ and traditional Lua access to undefined member
 __Loxy__ will throw `error` if you try access undefined member (exception are __setters/getters__ - see next section)
 
 
@@ -49,17 +49,16 @@ but with __loxy__ you will get `error`.
 __Loxy__ add some syntax sugar for object members:
 
 In example with `Circle` you can access:
-  - property `circle.radius` throught `circle:getRadius()` method. 
-  - method `circle:getArea()` by property `cicrcle.area`
+- property `circle.radius` throught `circle:getRadius()` method. 
+- method `circle:getArea()` by property `cicrcle.area`
 
+It means, following code is valid:
 
     circle = Circle{ radius = 10 }    
     assert( circle.area == 10 * PI)
     assert( circle:getRadius() == 10)
 
-Similar syntax sugar can be used for setters
-
-We will extend our class `Circle` with setter:
+Similar syntax sugar can be used for setter. We will extend our class `Circle` with setter:
 
     Circle = object({
       radius = 0,
@@ -75,6 +74,8 @@ Now You can use `Circle` in following way:
 
     c = Circle({ area = 20^2*PI })
     assert(c.radius == 20)
+    
+How you can see, in constructor I fill undefined member `area`. This pseudo attribute si valid due to method `setArea()`
 
 There is (in current version) __limitation__ around getter/property: 
 
@@ -102,32 +103,20 @@ If you try to do it, you will get `error` while accessing property or getter:
             stdin:1: in main chunk
             [C]: ?
 
-You can avoid this limitation by using _property with diferent name_ (e.g started by underscore) for use inside __setter/getter__
-
-    C = object({
-      _attr = 0,
-      getAttr = function(self) return self._attr end,
-      setAttr = function(self, attr) self._attr = attr end,
-    })
-
-    c = C{ attr = 5 }
-    assert(c.attr == 5)
-
-    c.attr = 6
-    assert(c.attr == 6)
+You can avoid this limitation by using _property with diferent name_ (e.g started by underscore) for use inside __setter/getter__. You can see usage of this concept on `Circle.area` attribute
     
 ### Read only attribute
 
-By define getter only w/o related property you are able to simulate Read Only attribute
+Concept of getter give you ability to simulate Read Only attribute
 
     C = object({ 
       getConst = function() 
-        return "This is Read Only Member"
+        return "Read Only Member"
       end
     })
     
     c = C()
-    assert(c.const == "This is Read Only Member")
+    assert(c.const == "Read Only Member")
     c.const = 1 -- throws error "write unknown attribute: const"
     
 
@@ -135,15 +124,15 @@ By define getter only w/o related property you are able to simulate Read Only at
 
 __Loxy__ implements simple inheritance mechanism throught call `object(<Parent>, <Class implementation>)`
 
-    Base = object({ 
+    Base = object({ -- define parent class 'Base'
       name = 'Base', 
       selfIntroduce = function(self) 
         return "Hello, my name is " .. self.name 
       end 
     })
 
-    Class = object(Base,{  -- there is 'Base' used as parent of 'Class'
-      name = 'Class' 
+    Class = object(Base,{  -- and 'Class' now inherits properties and methods from `Base`
+      name = 'Class'       -- we override 'name' property in 'Class'
     }) 
 
     b,c = Base(),Class()
@@ -188,14 +177,14 @@ __Loxy__ provide two kinds of constructor mechanism.
 
 ### Implicit constructor
 
-Copy members of table to object. If there is setter for attribute, implicit constructor invoke them.
+Copy members of table to object. If there is setter for attribute, implicit constructor will invoke it.
 You can avoid __setter invocation in constructor call__ by second parameter `false` to constructor
 
     C = object({ 
-      a = 0, 
-      setA = function(self, a) 
-        self.a = a + 1 
-      end 
+      a = 0,
+      setA = function(self, a)
+        self.a = a + 1
+      end
     })
 
     local c1 = C()     -- empty constructor call
@@ -209,7 +198,7 @@ You can avoid __setter invocation in constructor call__ by second parameter `fal
 
 ### Explicit c-tor
 
-You can define your own constructor by `__init()` method. In this case implicit constructor will not be invoked. Instead, all received params are sent to `__init()` method
+You can override implicit constructor by `__init()` method.
 
     C = object({ 
       a = 0, 
@@ -221,9 +210,9 @@ You can define your own constructor by `__init()` method. In this case implicit 
     local c = C(2)  -- this will invoke your __init() method instead of implicit constructor
     assert(c.a == 4)
 
-Invoked `__init()` will receive as first param `self` followed by all others param sent to constructor
+You can see, `__init()` will receive as first param `self` followed by all others param sent to constructor
 
-## Override metamethods
+## Overridable metamethods
 
 __Loxy__ allows override metamethods:
 
@@ -243,6 +232,7 @@ Accepted overridable metamethods are:
   * arithmetic: `__add`, `__mul`, `__sub`, `__div`, `__unm`, `__pow`,
   * comparable: `__eq`, `__lt`, `__le`,
 
+Other metamethods are not allowed in current version.
 
 ## Runtime Type Indentification
 
@@ -447,6 +437,12 @@ See pair of parenthesis at end of line - this will invoke constructor and  will 
 
     c = object({a = 0})()
 
+## Limitation
+
+It is not allowed to use table with connected metatable as class implementation. 
+It is dou to __Loxy__ internaly handle inheritance througth metatables.
+
+If you try to do it, __loxy__ throws error while `object()` is invoked
 
 ## TODOs
 

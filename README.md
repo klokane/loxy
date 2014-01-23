@@ -32,9 +32,8 @@ More about _constructors_ you can see in section __Constructor__
 
 ## Error on unknown member
 
-There is difference between __Loxy__ and traditional Lua access to undefined member
-__Loxy__ will throw `error` if you try access undefined member (exception are __setters/getters__ - see next section)
-
+There is difference between __Loxy__ and traditional Lua access to undefined member (or nil equal).
+While Lua returns nil on undefined member, __Loxy__ will throw `error` (there is exception about __setters/getters__ - see next section)
 
     t = {}
     print(t.a)     -- it will be OK due to Lua returns 'nil' for nonexisting member

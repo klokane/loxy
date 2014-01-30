@@ -445,9 +445,8 @@ If you try to do it, __loxy__ throws error while `object()` is invoked
 
 ## TODOs
 
- * access parent methods via 'super'
- * add extension method
- * allow memoize getters
- * ??? allow "protected" attrs via "_" prefix 
- * add extension methods
+ * ?? access parent methods via 'super'
+ * add extension method (mixins)
+ * allow memoizeable getters
+ * ?? allow "protected" attrs via "_" prefix 
  * reflection

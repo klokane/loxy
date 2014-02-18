@@ -22,7 +22,7 @@ __Loxy__ is short coming from 'Lua Object ProXY'
     area = circle:getArea()
     assert(area == 10^2*PI)
 
-You can set value of member `a` for `Circle` instance `c` in constructor:
+While you create instance, you can set value of member `radius` for object `circle` (instance of `Circle` class) via constructor:
 
     circle = Circle{ radius = 10 }
     area = circle:getArea()
@@ -33,7 +33,7 @@ More about _constructors_ you can see in section __Constructor__
 ## Error on unknown member
 
 There is difference between __Loxy__ and traditional Lua access to undefined member (or nil equal).
-While Lua returns nil on undefined member, __Loxy__ will throw `error` (there is exception about __setters/getters__ - see next section)
+While Lua returns nil on undefined member, __Loxy__ will throw `error` (there is exception for __setters/getters__ - see next section)
 
     t = {}
     print(t.a)     -- it will be OK due to Lua returns 'nil' for nonexisting member
